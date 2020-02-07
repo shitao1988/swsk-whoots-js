@@ -14,7 +14,7 @@ export { getURL, getTileBBox, getMercCoords };
  * @param    {String}  [options.service='WMS']
  * @param    {String}  [options.version='1.1.1']
  * @param    {String}  [options.request='GetMap']
- * @param    {String}  [options.srs='EPSG:4490']
+ * @param    {String}  [options.srs='EPSG:3857']
  * @param    {Number}  [options.width='256']
  * @param    {Number}  [options.height='256']
  * @returns  {String}  url
@@ -25,14 +25,14 @@ export { getURL, getTileBBox, getMercCoords };
  */
 function getURL(baseUrl, layer, x, y, z, options) {
     options = options || {};
-
+    let srs=options.srs || 'EPSG:3857';
     var url = baseUrl + '?' + [
-        'bbox='    + getTileBBox(x, y, z),
+        'bbox='    + getTileBBox(x, y, z,srs),
         'format='  + (options.format || 'image/png'),
         'service=' + (options.service || 'WMS'),
         'version=' + (options.version || '1.1.1'),
         'request=' + (options.request || 'GetMap'),
-        'srs='     + (options.srs || 'EPSG:4490'),
+        'srs='     + srs,
         'width='   + (options.width || 256),
         'height='  + (options.height || 256),
         'layers='  + layer
@@ -48,17 +48,28 @@ function getURL(baseUrl, layer, x, y, z, options) {
  * @param    {Number}  x  Tile coordinate x
  * @param    {Number}  y  Tile coordinate y
  * @param    {Number}  z  Tile zoom
+ * @param    {String}  srs 
  * @returns  {String}  String of the bounding box
  */
-function getTileBBox(x, y, z) {
-    const scale = 360 / Math.pow(2, z);
+function getTileBBox(x, y, z,srs) {
+    if(srs==='EPSG:4490'){
+        const scale = 360 / Math.pow(2, z);
 
-    const minX = x * scale - 180;
-    const minY = 90 - (y + 1) * scale;
-    const maxX = (x + 1) * scale - 180;
-    const maxY = 90 - y * scale;
+        const minX = x * scale - 180;
+        const minY = 90 - (y + 1) * scale;
+        const maxX = (x + 1) * scale - 180;
+        const maxY = 90 - y * scale;
+    
+        return [minX, minY, maxX, maxY].join(',');
+    }else{
+        y = (Math.pow(2, z) - y - 1);
+        var min = getMercCoords(x * 256, y * 256, z),
+            max = getMercCoords((x + 1) * 256, (y + 1) * 256, z);
+        return min[0] + ',' + min[1] + ',' + max[0] + ',' + max[1];
+    }
+    
 
-    return [minX, minY, maxX, maxY].join(',');
+   
 }
 
 
