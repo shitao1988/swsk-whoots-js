@@ -25,14 +25,14 @@ export { getURL, getTileBBox, getMercCoords };
  */
 function getURL(baseUrl, layer, x, y, z, options) {
     options = options || {};
-    let srs=options.srs || 'EPSG:3857';
+    let crs=options.crs || 'EPSG:3857';
     var url = baseUrl + '?' + [
-        'bbox='    + getTileBBox(x, y, z,srs),
+        'bbox='    + getTileBBox(x, y, z,crs),
         'format='  + (options.format || 'image/png'),
         'service=' + (options.service || 'WMS'),
         'version=' + (options.version || '1.1.1'),
         'request=' + (options.request || 'GetMap'),
-        'srs='     + srs,
+        'srs='     + crs,
         'width='   + (options.width || 256),
         'height='  + (options.height || 256),
         'layers='  + layer
@@ -51,8 +51,8 @@ function getURL(baseUrl, layer, x, y, z, options) {
  * @param    {String}  srs 
  * @returns  {String}  String of the bounding box
  */
-function getTileBBox(x, y, z,srs) {
-    if(srs==='EPSG:4490'){
+function getTileBBox(x, y, z,crs) {
+    if(crs==='EPSG:4490'){
         const scale = 360 / Math.pow(2, z);
 
         const minX = x * scale - 180;
